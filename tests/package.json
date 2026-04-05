@@ -1,0 +1,27 @@
+{
+  "name": "magic-chess-tests",
+  "version": "0.1.0",
+  "description": "E2E tests for Magic Chess — real devnet, zero mocks",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rules": "vitest run chess-rules",
+    "test:fuzz": "vitest run chess-fuzz",
+    "test:famous": "vitest run chess-famous-games",
+    "test:er": "vitest run er-pool",
+    "test:onchain": "vitest run chess-onchain"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@magicblock-labs/ephemeral-rollups-sdk": "^0.10.3",
+    "@magicblock-labs/soar-sdk": "^0.1.23",
+    "@solana/web3.js": "^1.98.0",
+    "chess.js": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+target/
+.anchor/
+test-ledger/
+.DS_Store
+*.log
+.env
+.env.local
+.env.*.local
+keys/
+keypair.json
+*-keypair.json
+.vercel/
+.next/

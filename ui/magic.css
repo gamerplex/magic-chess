@@ -1,0 +1,190 @@
+/* Magic Chess — MagicBlock × Solana themed effects */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap');
+
+/* Magic Chess theme — purple arcane styling */
+.magic-chess-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px #9945ff, 0 0 40px #00f0ff;
+  background: linear-gradient(135deg, #e0b3ff, #00f0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.magic-chess-panel {
+  background: rgba(25, 0, 51, 0.88) !important;
+  border: 1px solid rgba(153, 69, 255, 0.4) !important;
+  box-shadow: 0 0 30px rgba(153, 69, 255, 0.15), 0 0 60px rgba(153, 69, 255, 0.08) !important;
+  backdrop-filter: blur(12px);
+}
+
+.magic-chess-status {
+  background: linear-gradient(90deg, rgba(26, 10, 48, 0.95), rgba(12, 12, 20, 0.95)) !important;
+  border: 1px solid rgba(153, 69, 255, 0.3) !important;
+  box-shadow: 0 0 20px rgba(153, 69, 255, 0.1);
+}
+
+.magic-chess-btn {
+  background: linear-gradient(90deg, #9945ff, #00f0ff) !important;
+  color: #1a0033 !important;
+  border: none !important;
+  font-family: 'Cinzel Decorative', serif !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 25px rgba(153, 69, 255, 0.4);
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.magic-chess-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 45px rgba(0, 240, 255, 0.5);
+}
+
+.magic-chess-label {
+  font-family: 'Cinzel Decorative', serif;
+  color: #e0b3ff;
+  text-shadow: 0 0 10px rgba(153, 69, 255, 0.3);
+}
+
+.magic-chess-text {
+  color: #e0b3ff;
+}
+
+.magic-chess-glow {
+  text-shadow: 0 0 15px #9945ff, 0 0 30px rgba(0, 240, 255, 0.3);
+}
+
+@keyframes magicPulse {
+  from { text-shadow: 0 0 15px #9945ff; }
+  to   { text-shadow: 0 0 35px #00f0ff, 0 0 60px #9945ff; }
+}
+.magic-pulse {
+  animation: magicPulse 4s infinite alternate;
+}
+
+/* Piece slide animation */
+.chess-piece {
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Capture burst */
+@keyframes captureBurst {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.8); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.capture-burst {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #9945FF 0%, #14F195 50%, transparent 70%);
+  animation: captureBurst 0.4s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Check glow on king */
+@keyframes checkPulse {
+  0%, 100% { box-shadow: inset 0 0 20px rgba(255, 23, 68, 0.6); }
+  50% { box-shadow: inset 0 0 40px rgba(255, 23, 68, 0.9); }
+}
+.king-in-check {
+  animation: checkPulse 1s ease-in-out infinite;
+}
+
+/* Checkmate celebration */
+@keyframes confettiFloat {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-200px) rotate(720deg); opacity: 0; }
+}
+
+/* Magic sparkle particles */
+@keyframes sparkle {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1) rotate(180deg); opacity: 0.8; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+.magic-sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 20;
+  animation: sparkle 0.6s ease-out forwards;
+}
+
+/* Move trail */
+@keyframes moveTrail {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.3); }
+}
+.move-trail {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(153, 69, 255, 0.4), transparent);
+  animation: moveTrail 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Board hover glow */
+.magic-square:hover {
+  box-shadow: inset 0 0 15px rgba(153, 69, 255, 0.3) !important;
+}
+
+/* Selected piece lift */
+.piece-selected {
+  transform: scale(1.12);
+  filter: drop-shadow(0 4px 8px rgba(153, 69, 255, 0.5));
+  z-index: 5;
+}
+
+/* Screen shake */
+@keyframes boardShake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-3px) translateY(1px); }
+  30% { transform: translateX(3px) translateY(-1px); }
+  50% { transform: translateX(-2px) translateY(2px); }
+  70% { transform: translateX(2px) translateY(-1px); }
+  90% { transform: translateX(-1px); }
+}
+.board-shake {
+  animation: boardShake 0.3s ease-out;
+}
+
+/* Magic aura around board */
+.magic-board {
+  box-shadow:
+    0 0 30px rgba(153, 69, 255, 0.15),
+    0 0 60px rgba(20, 241, 149, 0.08);
+}
+
+/* Win celebration glow */
+@keyframes winGlow {
+  0% { box-shadow: 0 0 20px rgba(0, 230, 118, 0.3); }
+  50% { box-shadow: 0 0 60px rgba(0, 230, 118, 0.6), 0 0 100px rgba(153, 69, 255, 0.3); }
+  100% { box-shadow: 0 0 20px rgba(0, 230, 118, 0.3); }
+}
+.win-glow {
+  animation: winGlow 2s ease-in-out infinite;
+}
+
+/* Timer urgency */
+@keyframes timerUrgent {
+  0%, 100% { color: #ff1744; }
+  50% { color: #ff6b2c; }
+}
+.timer-urgent {
+  animation: timerUrgent 0.5s ease-in-out infinite;
+}
+
+/* Floating magic particles background */
+@keyframes float {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-20px) scale(1); opacity: 0; }
+}

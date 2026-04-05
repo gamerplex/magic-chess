@@ -1,0 +1,20 @@
+{
+  "name": "magic-chess-server",
+  "version": "0.1.0",
+  "description": "ER Pool management + REST API for Magic Chess",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npx tsx er-pool.ts"
+  },
+  "dependencies": {
+    "@magicblock-labs/ephemeral-rollups-sdk": "^0.10.3",
+    "@solana/web3.js": "^1.98.0",
+    "express": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
