@@ -5,7 +5,7 @@
 
 **Live demo:** https://gamerplex.com/play/chess
 **Submission for:** Solana Blitz v3 (MagicBlock Hackathon, April 2026)
-**Built by:** Johnny Buidl ([@zerorouter](https://x.com/zerorouter)) — solo builder
+**Built by:** John Forfar ([@johnforfar](https://x.com/johnforfar)) — solo builder
 
 ---
 
