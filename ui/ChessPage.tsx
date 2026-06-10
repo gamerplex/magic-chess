@@ -76,11 +76,6 @@ export default function ChessGame(){
   const[txLogs,setTxLogs]=useState<TxLog[]>([]);
   const[showTx,setShowTx]=useState(!isMobile);
   const[showBets,setShowBets]=useState(!isMobile);
-  const[matchStake]=useState(0); // 0 = free play. Set to real value when deposit happens.
-  const[matchSettled,setMatchSettled]=useState(false);
-  const[matchEventId,setMatchEventId]=useState<string|null>(null);
-  const[matchMarket,setMatchMarket]=useState<string|null>(null);
-  const isWagered=matchEventId!==null&&matchStake>0; // only true when real money is at stake
   const[cellSize,setCellSize]=useState(typeof window!=="undefined"&&window.innerWidth<768?48:72);
   const[lightMode,setLightMode]=useState(false);
   const[boardTheme,setBoardTheme]=useState<"classic"|"solana"|"magic"|"wood"|"chaos">("magic");
@@ -190,27 +185,22 @@ export default function ChessGame(){
       if(chainRef.current?.gamePda){
         try{
           const result={winner:won===true?"white" as const:won===false?"black" as const:"draw" as const,moves:mc};
-          // If wallet connected, pass it for SOAR score
           const wallet=publicKey?.toBase58();
           const ok=await chainRef.current.finish(wallet,result);
           if(ok){
             addTx(`Game committed to Solana${wallet?" + SOAR score saved":""}`,"settle");
-            setMatchSettled(true);
           }else{
             addTx("Game recycled","settle");
-            setMatchSettled(true);
           }
         }catch(e:any){
           addTx(`⚠ Finish error: ${e.message}`,"system");
-          setMatchSettled(true);
         }
       }else{
         addTx(`Game complete`,"settle");
-        setTimeout(()=>setMatchSettled(true),1000);
       }
     };
     finishOnChain();
-    addTx(`Match result — ${won?"White wins":won===false?"Black wins":"Draw"} ($${totalPot} pot)`,"settle");
+    addTx(`Match result — ${won?"White wins":won===false?"Black wins":"Draw"}`,"settle");
     const newTotal=totalGames+1;
     setTotalGames(newTotal);
     localStorage.setItem("gp_chess_total",newTotal.toString());
@@ -305,10 +295,9 @@ export default function ChessGame(){
     else{setSel(null);setValid([]);}
   },[phase,board,sel,valid,wTurn,ep,castle,execMove,addTx]);
 
-  const reset=()=>{setBoard(initBoard());setCap([]);setMc(0);setWTurn(true);setSel(null);setValid([]);setStatus("Your turn");setWon(null);setEp(255);setCastle(0b1111);setHist([]);setCheck(false);setTimer(MOVE_TIME);setTxLogs([]);setMatchSettled(false);setMatchEventId(null);setMatchMarket(null);};
+  const reset=()=>{setBoard(initBoard());setCap([]);setMc(0);setWTurn(true);setSel(null);setValid([]);setStatus("Your turn");setWon(null);setEp(255);setCastle(0b1111);setHist([]);setCheck(false);setTimer(MOVE_TIME);setTxLogs([]);};
   const cols="abcdefgh";
   const tm=Math.floor(timer/60),ts=(timer%60).toString().padStart(2,"0");
-  const totalPot=matchStake*2;
   const lm=lightMode;
 
   return(
@@ -426,7 +415,7 @@ export default function ChessGame(){
                   </div>
                   <div style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:4}}>
                     <span style={{background:"#ff6b2c",color:"#000",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700,flexShrink:0}}>2</span>
-                    <span>No external chess engines during wagered matches</span>
+                    <span>No external chess engines during matches</span>
                   </div>
                   <div style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:4}}>
                     <span style={{background:"#ff6b2c",color:"#000",borderRadius:4,padding:"1px 6px",fontSize:10,fontWeight:700,flexShrink:0}}>3</span>
@@ -438,7 +427,7 @@ export default function ChessGame(){
                   </div>
                 </div>
                 <div style={{fontSize:10,color:"#555",marginBottom:16}}>
-                  Violations may result in reputation loss and stake slashing.
+                  Violations may result in reputation loss.
                   By clicking below, you agree to the <a href="/docs" style={{color:"#448aff"}}>Terms of Service</a>.
                 </div>
                 <button onClick={async()=>{
@@ -464,7 +453,7 @@ export default function ChessGame(){
                 </button>
               </div>
             )}
-            <div style={{marginTop:20,fontSize:11,color:"#333"}}>Program: 3LVg8u...3QYr &bull; MagicBlock ER &bull; Contention Markets</div>
+            <div style={{marginTop:20,fontSize:11,color:"#333"}}>Program: 3LVg8u...3QYr &bull; MagicBlock ER</div>
           </div>
         </div>
       )}
@@ -646,25 +635,18 @@ export default function ChessGame(){
                 </div>}
 
                 <div className="magic-chess-title" style={{fontSize:36,fontWeight:700}}>{won?"✨ CHECKMATE ✨":won===false?"⚫ DEFEATED ⚫":"🤝 STALEMATE"}</div>
-                {isWagered?(
-                  <div style={{fontSize:22,fontWeight:700,color:won?"#ffd740":"#ff1744",fontFamily:"monospace"}}>{won?`+$${(totalPot*0.98).toFixed(2)} USDC`:won===false?`-$${matchStake.toFixed(2)} USDC`:"Draw — stakes returned"}</div>
+                <div style={{fontSize:13,color:"#b388ff",marginTop:6}}>🧙‍♂️ {mc} moves in Magic Chess</div>
+                {!publicKey?(
+                  <div style={{marginTop:12,padding:12,background:"rgba(153,69,255,0.08)",borderRadius:8,border:"1px solid rgba(153,69,255,0.2)"}}>
+                    <div style={{fontSize:12,fontWeight:700,color:"#14F195",marginBottom:6}}>Save your score on-chain forever?</div>
+                    <div style={{fontSize:10,color:"#888",marginBottom:8}}>Connect wallet to record {mc} moves + ELO on Solana via SOAR</div>
+                    <WalletMultiButton style={{fontSize:11,height:32,width:"100%",justifyContent:"center"}}/>
+                  </div>
                 ):(
-                  <>
-                    <div style={{fontSize:13,color:"#b388ff",marginTop:6}}>🧙‍♂️ {mc} moves in Magic Chess</div>
-                    {/* SOAR onboarding — the hook */}
-                    {!publicKey?(
-                      <div style={{marginTop:12,padding:12,background:"rgba(153,69,255,0.08)",borderRadius:8,border:"1px solid rgba(153,69,255,0.2)"}}>
-                        <div style={{fontSize:12,fontWeight:700,color:"#14F195",marginBottom:6}}>Save your score on-chain forever?</div>
-                        <div style={{fontSize:10,color:"#888",marginBottom:8}}>Connect wallet to record {mc} moves + ELO on Solana via SOAR</div>
-                        <WalletMultiButton style={{fontSize:11,height:32,width:"100%",justifyContent:"center"}}/>
-                      </div>
-                    ):(
-                      <div style={{marginTop:12,padding:12,background:"rgba(20,241,149,0.08)",borderRadius:8,border:"1px solid rgba(20,241,149,0.2)"}}>
-                        <div style={{fontSize:12,fontWeight:700,color:"#14F195",marginBottom:4}}>Score saved on Solana ✓</div>
-                        <div style={{fontSize:9,color:"#888"}}>{publicKey.toBase58().slice(0,4)}...{publicKey.toBase58().slice(-4)} &bull; SOAR Leaderboard</div>
-                      </div>
-                    )}
-                  </>
+                  <div style={{marginTop:12,padding:12,background:"rgba(20,241,149,0.08)",borderRadius:8,border:"1px solid rgba(20,241,149,0.2)"}}>
+                    <div style={{fontSize:12,fontWeight:700,color:"#14F195",marginBottom:4}}>Score saved on Solana ✓</div>
+                    <div style={{fontSize:9,color:"#888"}}>{publicKey.toBase58().slice(0,4)}...{publicKey.toBase58().slice(-4)} &bull; SOAR Leaderboard</div>
+                  </div>
                 )}
                 <div style={{fontSize:11,color:"#555",marginTop:4}}>{mc} moves &bull; {status}</div>
 
@@ -706,8 +688,7 @@ export default function ChessGame(){
                 <div style={{display:"flex",gap:8,marginTop:12}}>
                   <button onClick={()=>{
                     const streakText=won&&streak>=3?` | ${streak}-win streak 🔥`:"";
-                    const moneyText=isWagered?`\n${won?`+$${(totalPot*0.98).toFixed(2)}`:`-$${matchStake.toFixed(2)}`} USDC settled on Solana`:"";
-                    const t=encodeURIComponent(`${won?"Checkmated":"Lost to"} an AI in CHESS on @gamerplex_com\n\n♟ ${mc} moves${streakText}${moneyText}\n\nI bet you can't beat me\ngamerplex.com/play/chess`);
+                    const t=encodeURIComponent(`${won?"Checkmated":"Lost to"} an AI in CHESS on @gamerplex_com\n\n♟ ${mc} moves${streakText}\n\nI bet you can't beat me\ngamerplex.com/play/chess`);
                     window.open(`https://twitter.com/intent/tweet?text=${t}`,"_blank");
                   }} style={{flex:1,background:"#448aff",color:"white",border:"none",padding:"10px",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer"}}>Challenge on X</button>
                   <button className="magic-chess-btn" onClick={()=>{reset();setExperience(null);setShowPlayFair(false);setPhase("ready");}} style={{flex:1,padding:"10px",borderRadius:8,fontSize:13,cursor:"pointer"}}>✦ Play Again ✦</button>
@@ -739,49 +720,13 @@ export default function ChessGame(){
                 {/* MATCH TAB — shows real data or free play status */}
                 {rightTab==="match"&&<>
                   <div style={{background:lm?"#fff":"#0c0c14",borderRadius:6,padding:10,border:`1px solid ${lm?"#ddd":"#252540"}`}}>
-                    {isWagered?(
-                      <>
-                        <div style={{fontSize:9,color:lm?"#999":"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Match Entry</div>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                          <div style={{textAlign:"center"}}>
-                            <div style={{fontSize:9,color:"#888"}}>You (White)</div>
-                            <div style={{fontSize:16,fontWeight:700,color:"#ffd740",fontFamily:"monospace"}}>${matchStake}</div>
-                          </div>
-                          <div style={{fontSize:10,color:"#555",fontWeight:700}}>vs</div>
-                          <div style={{textAlign:"center"}}>
-                            <div style={{fontSize:9,color:"#888"}}>Agent (Black)</div>
-                            <div style={{fontSize:16,fontWeight:700,color:"#b388ff",fontFamily:"monospace"}}>${matchStake}</div>
-                          </div>
-                        </div>
-                        <div style={{background:lm?"#f5f5f5":"#14141f",borderRadius:4,padding:"6px 8px",marginBottom:6}}>
-                          <div style={{display:"flex",justifyContent:"space-between",fontSize:10}}>
-                            <span style={{color:"#888"}}>Total Prize Pool</span>
-                            <span style={{color:"#ff6b2c",fontWeight:700,fontFamily:"monospace"}}>${totalPot} USDC</span>
-                          </div>
-                          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginTop:2}}>
-                            <span style={{color:"#888"}}>Service Fee</span>
-                            <span style={{color:"#555",fontFamily:"monospace"}}>2% (${(totalPot*0.02).toFixed(2)})</span>
-                          </div>
-                          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginTop:2}}>
-                            <span style={{color:"#888"}}>Winner Gets</span>
-                            <span style={{color:"#00e676",fontWeight:700,fontFamily:"monospace"}}>${(totalPot*0.98).toFixed(2)}</span>
-                          </div>
-                        </div>
-                        <div style={{fontSize:9,color:matchSettled?"#00e676":phase==="gameover"?"#ffd740":"#18ffff",fontWeight:600}}>
-                          {matchSettled?"Settled on-chain":phase==="gameover"?"Settling...":"Match in progress"}
-                        </div>
-                      </>
-                    ):(
-                      <>
-                        <div style={{fontSize:9,color:lm?"#999":"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Free Play</div>
-                        <div style={{fontSize:11,color:"#888",lineHeight:1.8}}>
-                          <div>Playing for fun — no entry fee</div>
-                          {!publicKey&&<div style={{color:"#ffd740",marginTop:6}}>Connect wallet to record moves on-chain</div>}
-                          {publicKey&&!chainRef.current?.isReady&&<div style={{color:"#ffd740",marginTop:6}}>Fund session to record moves on-chain</div>}
-                          {chainRef.current?.isReady&&<div style={{color:"#00e676",marginTop:6}}>Moves recording on Solana devnet</div>}
-                        </div>
-                      </>
-                    )}
+                    <div style={{fontSize:9,color:lm?"#999":"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Free Play</div>
+                    <div style={{fontSize:11,color:"#888",lineHeight:1.8}}>
+                      <div>Playing for fun — no entry fee</div>
+                      {!publicKey&&<div style={{color:"#ffd740",marginTop:6}}>Connect wallet to record moves on-chain</div>}
+                      {publicKey&&!chainRef.current?.isReady&&<div style={{color:"#ffd740",marginTop:6}}>Fund session to record moves on-chain</div>}
+                      {chainRef.current?.isReady&&<div style={{color:"#00e676",marginTop:6}}>Moves recording on Solana devnet</div>}
+                    </div>
                   </div>
 
                   <div style={{background:lm?"#fff":"#0c0c14",borderRadius:6,padding:10,border:`1px solid ${lm?"#ddd":"#252540"}`}}>
@@ -792,12 +737,8 @@ export default function ChessGame(){
                         <span style={{color:"#18ffff"}}>MagicBlock ER</span>
                       </div>
                       <div style={{display:"flex",justifyContent:"space-between"}}>
-                        <span>Wager Protocol</span>
-                        <span style={{color:"#ff6b2c"}}>Contention Markets</span>
-                      </div>
-                      <div style={{display:"flex",justifyContent:"space-between"}}>
-                        <span>Settlement</span>
-                        <span style={{color:"#00e676"}}>Atomic, on-chain</span>
+                        <span>Score</span>
+                        <span style={{color:"#00e676"}}>SOAR leaderboard</span>
                       </div>
                     </div>
                   </div>
@@ -821,7 +762,6 @@ export default function ChessGame(){
                     <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Programs</div>
                     <div style={{fontSize:8,fontFamily:"monospace",color:"#444",lineHeight:2}}>
                       <div>Chess: <a href="https://explorer.solana.com/address/3LVg8uUsHtq6fusjrSfyGUCLQ83TFegDKmY3bCNz3QYr?cluster=devnet" target="_blank" rel="noopener noreferrer" style={{color:"#448aff",textDecoration:"none"}}>3LVg8u...3QYr</a></div>
-                      <div>Contention: <a href="https://explorer.solana.com/address/69YfcveAbLbJ5LNERjq6k5wnszfZbXMYVzx2j8Ca1Xo8?cluster=devnet" target="_blank" rel="noopener noreferrer" style={{color:"#448aff",textDecoration:"none"}}>69Yfcv...1Xo8</a></div>
                     </div>
                   </div>
                 </>}
